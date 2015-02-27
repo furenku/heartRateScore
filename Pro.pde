@@ -1,3 +1,4 @@
+/*
 import processing.serial.*;
 
 Serial myPort;
@@ -67,3 +68,4 @@ String obtenerPalabra( int _val ) {
   return estados[ int( posicion ) ];
 
 }
+*/
