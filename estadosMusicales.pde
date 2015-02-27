@@ -1,6 +1,7 @@
 import processing.serial.*;
 import processing.video.*;
 
+boolean testing = false;
 
 String estadosCorazon [] = {
   "piano","forte","ruido",
@@ -35,7 +36,6 @@ class Estado {
 Capture video;
 
 
-boolean testing = true;
 
 
 int numEstadosCamara = estadosCamara.length;
@@ -89,27 +89,31 @@ void setup() {
   for( int i = 0; i < estadosCamara.length; i++ ) {
     float angle = step * i;
 
-    float newX = (width/2) + cos( angle ) * width / 3;
-    float newY = (height/2) + sin( angle ) * height / 3;
+    float newX = (width/2) + cos( angle ) * width / 2.5;
+    float newY = (height/2) + sin( angle ) * height / 2.5;
 
     estados[i] = new Estado( estadosCamara[i], int(newX), int(newY) );
   }
 
 
-  String portName = Serial.list()[1];
+  String portName = Serial.list()[ 0 ];
   
-  // myPort = new Serial(this, portName, 9600);
+  for (int i = 0; i < Serial.list().length; i++) {
+    println(Serial.list()[i]);
+  }
+
+  myPort = new Serial(this, portName, 9600);
 
 
   String[] cameras = Capture.list();
-  video = new Capture(this, width, height, 30);
-  video.start();
-  prevFrame = createImage(video.width, video.height, RGB);
   println("Available cameras:");
   
   for (int i = 0; i < cameras.length; i++) {
     println(cameras[i]);
   }
+  video = new Capture(this, 640, 480, 30);
+  video.start();
+  prevFrame = createImage(video.width, video.height, RGB);
 
 
 }
@@ -139,8 +143,10 @@ void pulsar() {
   }
 
 
+
   textAlign(LEFT);
-  text("ritmo cardiaco: "+pulso, 20, 20 );
+  textSize( fontSize / 1.5 );
+  text("ritmo cardiaco: "+pulso, 20, 40 );
 
 }
 
@@ -153,15 +159,15 @@ void draw() {
 
   stroke(255);
   //fill(255);
-  dibujarEstados( mouseX, mouseY );
+  //dibujarEstados( mouseX, mouseY );
 
 
   //text( nearest.nombre,  ); //, width, fontSize );
+
+  camara();
   pulsar();
 
 
-
-  camara();
 
 }
 
@@ -207,7 +213,7 @@ Estado findNearest( int _x, int _y ) {
 
 
 void dibujarPalabra( String _palabra, int _x, int _y ){
-
+  textSize( fontSize * 1.5 );
   text ( _palabra, _x, _y, width, fontSize * 2 );
 
 }
@@ -238,6 +244,8 @@ String obtenerPalabra( int _val ) {
 
 void dibujarEstados(int _x, int _y) {
   
+  stroke(0);
+  fill(0);
   for( int i = 0; i < estadosCamara.length; i++ ) {
   
     ellipse( estados[i].x, estados[i].y, 20, 20  );
@@ -245,13 +253,20 @@ void dibujarEstados(int _x, int _y) {
     text( estados[i].nombre, estados[i].x, estados[i].y + fontSize );
   }
 
-  ellipse( _x, _y, 20, 20 );
-  Estado nearest = findNearest(_x, _y);
-  line( mouseX, mouseY, nearest.x, nearest.y );
-
-
-
+  stroke(127,0,255);
+  noFill();
+  strokeWeight(10);
+  ellipse( _x, _y, 60, 60 );
+  fill(0);
   stroke(0);
+
+  Estado nearest = findNearest(_x, _y);
+  
+  strokeWeight(1);
+  line( _x, _y, nearest.x, nearest.y );
+
+
+
   textAlign(CENTER);
   textSize( fontSize );
   
@@ -272,6 +287,8 @@ void camara() {
     video.read();
     
   }
+
+  // image( video, 0, 0, width, height );
  
   loadPixels();
   video.loadPixels();
@@ -330,10 +347,22 @@ void camara() {
     ballY-= rsp;
   }
  
-  updatePixels();
+  // updatePixels();
+  image(video,0,0,width,height);
+
+  fill(255,125);
+  rect(0,0,width,height);
   noStroke();
-  fill(0, 0, 255);
-  ellipse(ballX, ballY, 20, 20);
+
+  
+  int ballXinterpol = int((ballX/float(640))*width);
+  int ballYinterpol = int((ballY/float(480))*height);
+  // println(ballYinterpol);
+  
+  // ellipse(ballXinterpol, ballYinterpol, 40, 40);
+
+  // fill(0);
+  dibujarEstados( ballXinterpol, ballYinterpol );
 
 
 
